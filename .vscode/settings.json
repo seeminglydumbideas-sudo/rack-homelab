@@ -1,0 +1,7 @@
+{
+    "[asciidoc]": {
+        "editor.rulers": [80],
+        "editor.wordWrapColumn": 80,
+        "editor.wordWrap": "wordWrapColumn"
+    }
+}

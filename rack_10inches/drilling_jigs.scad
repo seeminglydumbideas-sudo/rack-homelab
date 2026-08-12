@@ -29,7 +29,7 @@ module u_channel_profile() {
 // ==========================================
 module starter_jig() {
     // Hauteur du premier trou par rapport à la traverse acier
-    h1 = wood_thickness + 6.35;
+    h1 = wood_thickness_bottom + 6.35;
     h2 = h1 + 15.875;
     
     height = h2 + 10; // On ajoute 10mm de marge au-dessus

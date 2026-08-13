@@ -113,20 +113,54 @@ if (afficher_grille_ventilation) {
 }
 
 if (afficher_panneaux_avant) {
-    // --- Front panel fictif (1U) ---
-    // On l'aligne parfaitement sur le premier emplacement (1U) au-dessus de la planche
-    translate([metal_profile_size + panel_margin + panel_width / 2, 1.5, start_z + U / 2])
+    // --- Front panel fictif (1er U) ---
+    translate([metal_profile_size + panel_margin + panel_width / 2, 1.5, start_z + U/2])
+        basic_front_plate(units=1);
+        
+    // --- Front panel fictif (2ème U) ---
+    translate([metal_profile_size + panel_margin + panel_width / 2, 1.5, start_z + U + U/2])
         basic_front_plate(units=1);
 }
 
 if (afficher_pieces_montage) {
-    // --- Pièces de montage 3D (Brackets) ---
-    // On utilise exploded_view_offset pour les "sortir" du châssis vers le centre
+    // --- Pièces de montage 3D (Brackets) - 1er U ---
     translate([metal_profile_size + exploded_view_offset, 0, start_z])
         front_plate_mount_left(units=1);
-        
     translate([metal_profile_size + panel_width + panel_margin * 2 - exploded_view_offset, 0, start_z])
         front_plate_mount_right(units=1);
+        
+    // --- Pièces de montage 3D (Brackets) - 2ème U (Avec hook type 2) ---
+    translate([metal_profile_size + exploded_view_offset, 0, start_z + U])
+        front_plate_mount_left(units=1, type2_hook=true, L_support=true);
+    translate([metal_profile_size + panel_width + panel_margin * 2 - exploded_view_offset, 0, start_z + U])
+        front_plate_mount_right(units=1, type2_hook=true, L_support=true);
+        
+    // --- Pièces ARRIÈRE pour le 2ème U ---
+    translate([metal_profile_size + exploded_view_offset, rack_depth - metal_profile_size, start_z + U])
+        rear_plate_mount_left(units=1, type2_hook=true, L_support=true);
+    translate([metal_profile_size + panel_width + panel_margin * 2 - exploded_view_offset, rack_depth - metal_profile_size, start_z + U])
+        rear_plate_mount_right(units=1, type2_hook=true, L_support=true);
+        
+    // --- Profilés en L Aluminium (10x10x1.5mm) pour le 2ème U ---
+    // Le trou s'arrête à Y=6 à l'avant et Y=rack_depth-6 à l'arrière. Longueur = 288mm.
+    color("Silver") {
+        L_length = rack_depth - 12;
+        L_z = start_z + U + 3;
+        
+        // Profilé Gauche (X=3)
+        // Face verticale sur la gauche (extérieure), face horizontale pointe vers la droite (+X)
+        translate([metal_profile_size + 3, 6, L_z + 0.5]) {
+            cube([1.5, L_length, 10]);
+            cube([10, L_length, 1.5]);
+        }
+            
+        // Profilé Droit (X = rack_width - 3)
+        // Face verticale sur la droite (extérieure), face horizontale pointe vers la gauche (-X)
+        translate([metal_profile_size + panel_width + panel_margin * 2 - 3 - 1.5, 6, L_z + 0.5]) {
+            cube([1.5, L_length, 10]);
+            translate([-8.5, 0, 0]) cube([10, L_length, 1.5]);
+        }
+    }
 }
 
 if (afficher_habillage_bois) {

@@ -31,8 +31,35 @@ module top_peg_with_hook() {
     }
 }
 
+// Deuxième type de téton (copie pour l'instant, à adapter)
+module top_peg_with_hook_type2() {
+    union() {
+        // 1. Le corps du téton (demi-cylindre supérieur)
+        difference() {
+            // Cylindre pointant vers X négatif (longueur 5mm)
+            rotate([0, -90, 0])
+                cylinder(r=2.8, h=5, $fn=32);
+                
+            // On coupe la partie inférieure (Z < 0)
+            translate([-6, -3, -3])
+                cube([7, 6, 3]);
+        }
+        
+        // 2. L'ergot d'accroche (Hook)
+        hull() {
+            // Base de l'ergot
+            translate([-5, -2.8, 0]) 
+                cube([2.6, 5.6, 2.8]);
+                
+            // Sommet de l'ergot
+            translate([-3.9, -2.8, 4.5]) 
+                cube([1.5, 5.6, 0.5]);
+        }
+    }
+}
+
 // Pièce de montage gauche (L-bracket avec tétons)
-module front_plate_mount_left(units=1) {
+module front_plate_mount_left(units=1, type2_hook=false, L_support=false) {
     // Hauteur ajustée pour être à fleur du sommet du téton le plus haut.
     // Le téton haut est à (units-1)*U + 38.1, son rayon est de 2.8.
     h_top = (units - 1) * U + 38.1 + 2.8;
@@ -68,11 +95,27 @@ module front_plate_mount_left(units=1) {
                         cube([4, 8, 16]);
                         
                     // Bossage cylindrique (arrondi) autour de la vis
-                    // Centre en X=13, Z=screw_z. Commence à Y=3 (appui du panneau), profondeur 10.
+                    // Centre en X=13, Z=screw_z. Commence à Y=3 (appui du panneau), profondeur 16.
                     // Rayon de 6mm pour bien enrober l'insert (r=3.5), laissant 2.5mm de paroi.
                     translate([13, 3, screw_z])
                         rotate([-90, 0, 0])
-                        cylinder(r=6, h=10, $fn=32);
+                        cylinder(r=6, h=16, $fn=32);
+                }
+            }
+            
+            // 3. Support pour profilé aluminium en L (si activé)
+            if (L_support) {
+                for (i = [0 : units - 1]) {
+                    screw_z = i * U + 22.725;
+                    L_z = i * U + 3; // Descendu au plus bas (le bossage commence à Z=3, le U d'en dessous est à Z=0)
+                    hull() {
+                        translate([0, y_spine, L_z - 3])
+                            cube([4, 8, 16]);
+                        // Bossage rectangulaire englobant le L
+                        // S'étend de Z=3 à Z=19, fusionnant avec le bossage M5 (qui commence à 16.725)
+                        translate([1, 3, L_z - 3])
+                            cube([14, 16, 16]);
+                    }
                 }
             }
                 
@@ -81,9 +124,14 @@ module front_plate_mount_left(units=1) {
                 rotate([0, -90, 0]) cylinder(r1=2.8, r2=1.5, h=3, $fn=32);
                 
             // Téton du haut (demi-cercle avec ergot)
-            // Le trou du haut d'un U est à 38.1mm
-            translate([0, metal_profile_size/2, (units-1)*U + 38.1])
-                top_peg_with_hook();
+            // Le trou du haut du dernier U est à 38.1mm
+            if (type2_hook) {
+                translate([0, metal_profile_size/2, (units-1)*U + 38.1])
+                    top_peg_with_hook_type2();
+            } else {
+                translate([0, metal_profile_size/2, (units-1)*U + 38.1])
+                    top_peg_with_hook();
+            }
         }
         
         // --- Trous à creuser ---
@@ -92,16 +140,51 @@ module front_plate_mount_left(units=1) {
         for (i = [0 : units - 1]) {
             translate([13, 8, i * U + 22.725])
                 rotate([90, 0, 0])
-                cylinder(r=3.5, h=20, center=true, $fn=32);
+                cylinder(r=3.5, h=30, center=true, $fn=32); // h=30 pour couper largement et éviter la paroi d'1 pixel
+        }
+        
+        // Trou borgne pour la cornière en L (si activé)
+        if (L_support) {
+            for (i = [0 : units - 1]) {
+                L_z = i * U + 3;
+                // Fente borgne L (10.5 x 10.5 x 2.5mm d'épaisseur)
+                // Va de Y=6 (fond) à Y=20 (ouverture), depth=14mm
+                // Coupe largement à l'arrière pour éviter la paroi d'1 pixel
+                translate([3, 6, L_z]) {
+                    // Tranchée verticale
+                    cube([2.5, 14, 10.5]);
+                    // Tranchée horizontale
+                    cube([10.5, 14, 2.5]);
+                }
+            }
         }
     }
 }
 
 // Pièce de montage droite (Miroir de la gauche)
-module front_plate_mount_right(units=1) {
+module front_plate_mount_right(units=1, type2_hook=false, L_support=false) {
     // On utilise la fonction miroir sur l'axe X pour créer la pièce droite
     mirror([1, 0, 0])
-        front_plate_mount_left(units);
+        front_plate_mount_left(units, type2_hook, L_support);
+}
+
+// ====================================================
+// FIXATIONS ARRIÈRE
+// ====================================================
+
+// Pièce de montage arrière gauche (Miroir en Y de la pièce avant)
+module rear_plate_mount_left(units=1, type2_hook=false, L_support=false) {
+    // On miroir sur l'axe Y pour que le trou de vis pointe vers l'intérieur du rack (ou l'arrière)
+    // Le décalage de metal_profile_size permet de retomber pile sur le poteau
+    translate([0, metal_profile_size, 0])
+        mirror([0, 1, 0])
+            front_plate_mount_left(units, type2_hook, L_support);
+}
+
+// Pièce de montage arrière droite
+module rear_plate_mount_right(units=1, type2_hook=false, L_support=false) {
+    mirror([1, 0, 0])
+        rear_plate_mount_left(units, type2_hook, L_support);
 }
 
 // Affichage de test si on ouvre juste ce fichier

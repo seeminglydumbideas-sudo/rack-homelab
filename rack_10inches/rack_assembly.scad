@@ -125,21 +125,27 @@ if (afficher_panneaux_avant) {
 if (afficher_pieces_montage) {
     // --- Pièces de montage 3D (Brackets) - 1er U ---
     translate([metal_profile_size + exploded_view_offset, 0, start_z])
-        front_plate_mount_left(units=1);
+        front_plate_mount_left(units=1, holes=[22.225]);
     translate([metal_profile_size + panel_width + panel_margin * 2 - exploded_view_offset, 0, start_z])
-        front_plate_mount_right(units=1);
+        front_plate_mount_right(units=1, holes=[22.225]);
         
     // --- Pièces de montage 3D (Brackets) - 2ème U (Avec hook type 2) ---
     translate([metal_profile_size + exploded_view_offset, 0, start_z + U])
-        front_plate_mount_left(units=1, type2_hook=true, L_support=true);
+        front_plate_mount_left(units=1, type2_hook=true, L_support=true, holes=[22.225]);
     translate([metal_profile_size + panel_width + panel_margin * 2 - exploded_view_offset, 0, start_z + U])
-        front_plate_mount_right(units=1, type2_hook=true, L_support=true);
+        front_plate_mount_right(units=1, type2_hook=true, L_support=true, holes=[22.225]);
         
     // --- Pièces ARRIÈRE pour le 2ème U ---
     translate([metal_profile_size + exploded_view_offset, rack_depth - metal_profile_size, start_z + U])
-        rear_plate_mount_left(units=1, type2_hook=true, L_support=true);
+        rear_plate_mount_left(units=1, type2_hook=true, L_support=true, holes=[22.225]);
     translate([metal_profile_size + panel_width + panel_margin * 2 - exploded_view_offset, rack_depth - metal_profile_size, start_z + U])
-        rear_plate_mount_right(units=1, type2_hook=true, L_support=true);
+        rear_plate_mount_right(units=1, type2_hook=true, L_support=true, holes=[22.225]);
+        
+    // --- Pièces de montage 3D (Brackets) - 3ème U (2 trous) ---
+    translate([metal_profile_size + exploded_view_offset, 0, start_z + 2*U])
+        front_plate_mount_left(units=1, type2_hook=true, holes=[6.35, 38.1]);
+    translate([metal_profile_size + panel_width + panel_margin * 2 - exploded_view_offset, 0, start_z + 2*U])
+        front_plate_mount_right(units=1, type2_hook=true, holes=[6.35, 38.1]);
         
     // --- Profilés en L Aluminium (10x10x1.5mm) pour le 2ème U ---
     // Le trou s'arrête à Y=6 à l'avant et Y=rack_depth-6 à l'arrière. Longueur = 288mm.

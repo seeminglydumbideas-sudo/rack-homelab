@@ -59,7 +59,7 @@ module top_peg_with_hook_type2() {
 }
 
 // Pièce de montage gauche (L-bracket avec tétons)
-module front_plate_mount_left(units=1, type2_hook=false, L_support=false) {
+module front_plate_mount_left(units=1, type2_hook=false, L_support=false, holes=[6.35, 22.225, 38.1]) {
     // Hauteur ajustée pour être à fleur du sommet du téton le plus haut.
     // Le téton haut est à (units-1)*U + 38.1, son rayon est de 2.8.
     h_top = (units - 1) * U + 38.1 + 2.8;
@@ -87,26 +87,30 @@ module front_plate_mount_left(units=1, type2_hook=false, L_support=false) {
             // 2. Bras de fixation pour chaque trou (Bossages)
             // Au lieu d'un bloc massif, on crée un bras arrondi uniquement là où se trouve la vis.
             for (i = [0 : units - 1]) {
-                screw_z = i * U + 22.725;
-                // hull() crée une transition douce et solide entre la colonne et le cylindre
-                hull() {
-                    // Base du bras sur la colonne (utilise le même positionnement Y que la colonne)
-                    translate([0, y_spine, screw_z - 8])
-                        cube([4, 8, 16]);
-                        
-                    // Bossage cylindrique (arrondi) autour de la vis
-                    // Centre en X=13, Z=screw_z. Commence à Y=3 (appui du panneau), profondeur 16.
-                    // Rayon de 6mm pour bien enrober l'insert (r=3.5), laissant 2.5mm de paroi.
-                    translate([13, 3, screw_z])
-                        rotate([-90, 0, 0])
-                        cylinder(r=6, h=16, $fn=32);
+                for (offset = holes) {
+                    screw_z = i * U + offset;
+                    // hull() crée une transition douce et solide entre la colonne et le cylindre
+                    hull() {
+                        // Base du bras sur la colonne (utilise le même positionnement Y que la colonne)
+                        // On limite la hauteur pour ne pas dépasser du support
+                        base_z_start = max(z_bottom, screw_z - 8);
+                        base_z_end = min(h_top, screw_z + 8);
+                        translate([0, y_spine, base_z_start])
+                            cube([4, 8, base_z_end - base_z_start]);
+                            
+                        // Bossage cylindrique (arrondi) autour de la vis
+                        // Centre en X=13, Z=screw_z. Commence à Y=3 (appui du panneau), profondeur 16.
+                        // Rayon de 6mm pour bien enrober l'insert (r=3.5), laissant 2.5mm de paroi.
+                        translate([13, 3, screw_z])
+                            rotate([-90, 0, 0])
+                            cylinder(r=6, h=16, $fn=32);
+                    }
                 }
             }
             
             // 3. Support pour profilé aluminium en L (si activé)
             if (L_support) {
                 for (i = [0 : units - 1]) {
-                    screw_z = i * U + 22.725;
                     L_z = i * U + 3; // Descendu au plus bas (le bossage commence à Z=3, le U d'en dessous est à Z=0)
                     hull() {
                         translate([0, y_spine, L_z - 3])
@@ -138,9 +142,11 @@ module front_plate_mount_left(units=1, type2_hook=false, L_support=false) {
         // Emplacement pour un insert fileté M5 posé à chaud (Heat-set insert)
         // Diamètre typique d'un insert M5 : ~7.0mm (r=3.5)
         for (i = [0 : units - 1]) {
-            translate([13, 8, i * U + 22.725])
-                rotate([90, 0, 0])
-                cylinder(r=3.5, h=30, center=true, $fn=32); // h=30 pour couper largement et éviter la paroi d'1 pixel
+            for (offset = holes) {
+                translate([13, 8, i * U + offset])
+                    rotate([90, 0, 0])
+                    cylinder(r=3.5, h=30, center=true, $fn=32); // h=30 pour couper largement et éviter la paroi d'1 pixel
+            }
         }
         
         // Trou borgne pour la cornière en L (si activé)
@@ -162,10 +168,10 @@ module front_plate_mount_left(units=1, type2_hook=false, L_support=false) {
 }
 
 // Pièce de montage droite (Miroir de la gauche)
-module front_plate_mount_right(units=1, type2_hook=false, L_support=false) {
+module front_plate_mount_right(units=1, type2_hook=false, L_support=false, holes=[6.35, 22.225, 38.1]) {
     // On utilise la fonction miroir sur l'axe X pour créer la pièce droite
     mirror([1, 0, 0])
-        front_plate_mount_left(units, type2_hook, L_support);
+        front_plate_mount_left(units, type2_hook, L_support, holes);
 }
 
 // ====================================================
@@ -173,18 +179,18 @@ module front_plate_mount_right(units=1, type2_hook=false, L_support=false) {
 // ====================================================
 
 // Pièce de montage arrière gauche (Miroir en Y de la pièce avant)
-module rear_plate_mount_left(units=1, type2_hook=false, L_support=false) {
+module rear_plate_mount_left(units=1, type2_hook=false, L_support=false, holes=[6.35, 22.225, 38.1]) {
     // On miroir sur l'axe Y pour que le trou de vis pointe vers l'intérieur du rack (ou l'arrière)
     // Le décalage de metal_profile_size permet de retomber pile sur le poteau
     translate([0, metal_profile_size, 0])
         mirror([0, 1, 0])
-            front_plate_mount_left(units, type2_hook, L_support);
+            front_plate_mount_left(units, type2_hook, L_support, holes);
 }
 
 // Pièce de montage arrière droite
-module rear_plate_mount_right(units=1, type2_hook=false, L_support=false) {
+module rear_plate_mount_right(units=1, type2_hook=false, L_support=false, holes=[6.35, 22.225, 38.1]) {
     mirror([1, 0, 0])
-        rear_plate_mount_left(units, type2_hook, L_support);
+        rear_plate_mount_left(units, type2_hook, L_support, holes);
 }
 
 // Affichage de test si on ouvre juste ce fichier

@@ -1,0 +1,54 @@
+= 10-Inch Rack Standards
+:toc:
+:icons: font
+
+== Overview
+
+Unlike 19-inch racks (which strictly follow the EIA-310 / IEC 60297 standard), the "10-inch" (or mini-rack) format does not have an official worldwide standard. Manufacturers generally adapt the 19-inch specifications to a smaller form factor, leading to slight variations between brands.
+
+However, the industry has converged on a general "unwritten consensus" for 10-inch panels and racks, documented below.
+
+== Vertical Dimensions (Height)
+
+The vertical spacing exactly mirrors the 19-inch EIA-310 standard.
+
+* **1 Rack Unit (1U):** 1.75 inches (44.45 mm)
+* **Hole Spacing within 1U:** The standard 3-hole pattern uses distances of 5/8" (15.875 mm), 5/8" (15.875 mm), and 1/2" (12.7 mm) from center to center.
+
+== Horizontal Dimensions (Width)
+
+Because there is no official governing body, horizontal dimensions vary the most between manufacturers.
+
+* **Total Panel Width:** Exactly 10 inches (254 mm)
+* **Usable Inner Opening (Between Rails):** Usually about 8.75 inches (222 mm)
+* **Center-to-Center Hole Distance:** Typically ranges between 236 mm and 241 mm (9.3" to 9.5")
+
+== Depth Dimensions
+
+Unlike 19-inch racks (which have common standard depths like 600mm, 800mm, or 1000mm), **there is no standard depth for 10-inch racks.** Depth varies entirely by manufacturer and the intended use-case (e.g., a shallow cabinet for patch panels vs. a deeper cabinet for a mini NAS or switch).
+
+* **Current CAD Value:** In this project, the `rack_depth` is set to 300 mm. Factoring in the front and rear metal frame profiles (15 mm each), the **distance between the front and rear mounting rails is exactly 270 mm**.
+* **Recommendation:** When designing equipment that relies on 4-post mounting (like a heavy server tray), always measure the actual physical depth of your rails or design your rear mounts to be adjustable (using sliding rails).
+
+=== Recommended CAD Dimensions
+
+To ensure maximum compatibility when designing custom 10-inch rack equipment (such as 3D-printed or CNC-milled front plates), we use the following measurements in this project:
+
+* **Panel Width:** `254 mm`
+* **Horizontal Hole Spacing:** `236 mm` (This aligns perfectly with standard 20mm commercial rails mounted to our frame)
+
+[TIP]
+====
+It is highly recommended to use slotted or slightly oversized holes (e.g., oval holes) for the horizontal mounting points on any custom panels. This allows for a few millimeters of wiggle room to accommodate different commercial rail manufacturers.
+====
+
+== Commercial Rack Rails (Example)
+
+Based on commonly available "DIY Server Rack Rails" (e.g., 8U rails from AliExpress), the physical dimensions of standard commercial L-profile rails are typically:
+
+* **Length (8U):** 35.5 cm (13.98 in)
+* **Front Face (Square Holes):** 2.0 cm (0.787 in) width
+* **Side Face (Mounting Face):** 2.7 cm (1.06 in) depth
+* **Side Mounting Holes:** Typically 8 round holes per 8U strip, each with a diameter of 0.25 inches (~6.35 mm).
+
+These dimensions are highly typical for cheap, mass-produced server rack rails. When designing a frame, you must account for the 2.0 cm width of the front face to ensure your 10-inch equipment still aligns properly (as addressed in our CAD model by setting the side margin to 1mm).

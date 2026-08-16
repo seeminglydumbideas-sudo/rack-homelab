@@ -12,8 +12,8 @@ module cooling_mesh_wall() {
     // Épaisseur du sous-cadre du grillage (profilés acier plus fins, ex: 10x10mm)
     frame = 10;
     
-    // Positionnement dans la "fenêtre" du cadre gauche (qui fait 15x15 d'épaisseur)
-    x_offset = (metal_profile_size - frame) / 2; // Centré dans l'épaisseur de 15mm
+    // Positionnement dans la "fenêtre" du cadre gauche (qui fait metal_profile_size d'épaisseur)
+    x_offset = (metal_profile_size - frame) / 2; // Centré dans l'épaisseur du profilé
     
     // Espace libre tout autour du sous-cadre
     gap = 10;
